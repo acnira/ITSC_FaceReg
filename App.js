@@ -18,25 +18,26 @@
 );
 
  class App extends Component {
-
-  //camera=null;
-
   render() {
     return (
       <View style={styles.container}>
         <RNCamera
+          ref={ref => {
+            this.camera = ref;
+          }}
           style={styles.preview}
           type={RNCamera.Constants.Type.back}
           flashMode={RNCamera.Constants.FlashMode.on}
-          faceDetectionMode={RNCamera.Constants.FaceDetection.Mode.fast}
-          onFacesDetected={this.handleFaceDetected}
+          faceDetectionLandmarks={
+            RNCamera.Constants.FaceDetection.Landmarks.all
+          }
+          onFacesDetected={this.facesDetected}
         >
           {({ camera, status, recordAudioPermissionStatus }) => {
             if (status !== 'READY') return <PendingView />;
-            //this.camera=camera;
             return (
               <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-                <TouchableOpacity onPress={() => this.takePicture(camera)} style={styles.capture}>
+                <TouchableOpacity onPress={this.takePicture.bind(this)} style={styles.capture}>
                   <Text style={{ fontSize: 14 }}> SNAP </Text>
                 </TouchableOpacity>
               </View>
@@ -47,17 +48,23 @@
     );
   }
 
-  takePicture = async function(camera) {
+  takePicture = async function() {
     const options = { quality: 0.5, base64: true };
     const data = await this.camera.takePictureAsync(options);
     console.log(data.uri);
+    //console.log(this.camera.Constants);
   };
 
-  faceDetectionHandler = face => {
-    this.setState({ faceDetected: true });
-    console.log("Face detected!!!!");
-    console.log("info: ",RNCamera.Constants.FaceDetection.Landmarks.all);
-    //this.takePicture(this.camera);
+  facesDetected = async function(faces) {
+    console.log('Faces detection success:');
+    console.log("number of faces: ",faces.faces.length);
+    if (faces.faces.length == 1){
+      console.log("face yaw angle: ",faces.faces[0].yawAngle);
+
+      //check face angle
+      //call this.takePicture if angle is correct
+    }
+
   };
 }
 

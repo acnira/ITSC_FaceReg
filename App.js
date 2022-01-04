@@ -18,6 +18,7 @@
 );
 
  class App extends Component {
+  captured = false;
   render() {
     return (
       <View style={styles.container}>
@@ -31,7 +32,7 @@
           faceDetectionLandmarks={
             RNCamera.Constants.FaceDetection.Landmarks.all
           }
-          onFacesDetected={this.facesDetected}
+          onFacesDetected={this.facesDetected.bind(this)}
         >
           {({ camera, status, recordAudioPermissionStatus }) => {
             if (status !== 'READY') return <PendingView />;
@@ -52,17 +53,24 @@
     const options = { quality: 0.5, base64: true };
     const data = await this.camera.takePictureAsync(options);
     console.log(data.uri);
-    //console.log(this.camera.Constants);
+    //console.log("camera: ",this.camera.takePictureAsync);
   };
 
   facesDetected = async function(faces) {
-    console.log('Faces detection success:');
-    console.log("number of faces: ",faces.faces.length);
+    //console.log('Faces detection success:');
+    //console.log("number of faces: ",faces.faces.length);
+    //console.log(this.camera);
     if (faces.faces.length == 1){
-      console.log("face yaw angle: ",faces.faces[0].yawAngle);
+      //console.log("face yaw angle: ",faces.faces[0].yawAngle);
 
       //check face angle
       //call this.takePicture if angle is correct
+      if (!this.captured && (faces.faces[0].yawAngle<=10 || faces.faces[0].yawAngle>=350)){
+        this.captured=true;
+        const options = { quality: 0.5, base64: true };
+        const data = await this.camera.takePictureAsync(options);
+        console.log("face angle: ",faces.faces[0].yawAngle,"\ncaptured at: ",data.uri);
+      }
     }
 
   };
